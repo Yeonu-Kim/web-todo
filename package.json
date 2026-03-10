@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Yeonu-Kim/web-todo#readme",
   "devDependencies": {
+    "@types/node": "^25.4.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {

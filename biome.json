@@ -97,8 +97,7 @@
         "useAwait": "error",
         "useGetterReturn": "off",
         "useNamespaceKeyword": "error",
-        "noImplicitAnyLet": "error",
-        "noConsole": "error"
+        "noImplicitAnyLet": "error"
       },
       "style": {
         "noNamespace": "error",
