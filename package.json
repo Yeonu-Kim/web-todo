@@ -1,0 +1,29 @@
+{
+  "name": "week2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check:type": "tsc --noEmit",
+    "check:lint": "biome lint .",
+    "check:format": "biome check .",
+    "check-all": "npm run check:type && npm run check:lint && npm run check:format"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yeonu-Kim/web-todo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yeonu-Kim/web-todo/issues"
+  },
+  "homepage": "https://github.com/Yeonu-Kim/web-todo#readme",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@biomejs/biome": "^2.4.6"
+  }
+}
