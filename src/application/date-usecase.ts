@@ -12,6 +12,6 @@ export const implDateUsecase = ({
     const month = now.toLocaleDateString('ko-KR', { month: 'long' });
     const day = now.getDate();
 
-    return `${weekday}, ${month} ${day}`;
+    return `${weekday}, ${month} ${day}일`;
   },
 });

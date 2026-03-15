@@ -19,6 +19,10 @@ export class TodoApp extends HTMLElement {
     this.addEventListener('todo:added', this.handleAdded);
   }
 
+  disconnectedCallback() {
+    this.removeEventListener('todo:added', this.handleAdded);
+  }
+
   private injectDependencies() {
     const todoInput = this.querySelector<TodoInput>('todo-input');
     const todoHeader = this.querySelector<TodoHeader>('todo-header');
@@ -36,8 +40,12 @@ export class TodoApp extends HTMLElement {
   }
 
   private handleAdded = (e: Event) => {
+    if (!(e instanceof CustomEvent)) return;
     this.querySelector('todo-list')?.dispatchEvent(
-      new CustomEvent('todo:added', { detail: (e as CustomEvent).detail })
+      new CustomEvent('todo:added', {
+        detail: e.detail,
+        bubbles: false,
+      })
     );
   };
 
