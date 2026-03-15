@@ -16,16 +16,17 @@ export function inject<T>(name: string) {
   return (
     _: ClassAccessorDecoratorTarget<HTMLElement, T>
   ): ClassAccessorDecoratorResult<HTMLElement, T> => {
-    let _value: T | null = null;
+    const store = new WeakMap<HTMLElement, T>();
     return {
-      get(): T {
-        if (_value == null) {
+      get(this: HTMLElement): T {
+        const value = store.get(this);
+        if (value == null) {
           throw new Error(`'${name}'가 주입되지 않았어요.`);
         }
-        return _value;
+        return value;
       },
-      set(value: T) {
-        _value = value;
+      set(this: HTMLElement, value: T) {
+        store.set(this, value);
       },
     };
   };
