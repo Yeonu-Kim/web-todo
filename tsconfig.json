@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     // File Layout
+    "rootDir": "./src",
     "outDir": "./dist",
 
     // Environment Settings
     "module": "esnext",
     "target": "esnext",
     "lib": ["esnext", "dom", "dom.iterable"],
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
 
     // Other Outputs
     "sourceMap": true,

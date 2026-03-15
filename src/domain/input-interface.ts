@@ -1,4 +1,4 @@
-import type { RepositoryResponseType } from './response-type';
+import type { RepositoryResponseType } from './response-type.js';
 
 type InputRepositorySuccessResponse =
   | { state: 'HELP' | 'READ_TODOS' }

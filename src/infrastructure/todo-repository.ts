@@ -1,9 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { TODO_FILE_PATH } from '../domain/file-root';
-import type { Todo, TodoRepository } from '../domain/todo-interface';
+import type { Todo, TodoRepository } from '../domain/todo-interface.js';
+import { implIndexedDBRepository } from './db-repository.js';
 
-const TODO_FILE = path.resolve(process.cwd(), TODO_FILE_PATH);
+const STORE_NAME = 'todos';
 
 const todoTypeGuard = (value: unknown): value is Todo => {
   return (
@@ -19,27 +17,26 @@ const todoTypeGuard = (value: unknown): value is Todo => {
 };
 
 export const implTodoRepository = (): TodoRepository => {
-  if (!fs.existsSync(TODO_FILE)) {
-    fs.writeFileSync(TODO_FILE, '[]', 'utf-8');
-  }
+  const db = implIndexedDBRepository(STORE_NAME);
 
   return {
-    readTodos: () => {
+    readTodos: async () => {
       try {
-        const raw = fs.readFileSync(TODO_FILE, 'utf-8');
-        const parsed: unknown = JSON.parse(raw);
+        const todos = await db.getAll<unknown>();
 
-        if (!Array.isArray(parsed) || !parsed.every(todoTypeGuard)) {
+        if (!todos.every(todoTypeGuard)) {
           return { state: 'error', detailedError: 'INVALID_JSON_FORMAT' };
         }
-        return { state: 'success', data: parsed };
+
+        return { state: 'success', data: todos };
       } catch {
         return { state: 'error', detailedError: 'FILE_READ_FAILED' };
       }
     },
-    writeTodos: ({ todos }) => {
+
+    writeTodos: async ({ todos }) => {
       try {
-        fs.writeFileSync(TODO_FILE, JSON.stringify(todos, null, 2), 'utf-8');
+        await db.replaceAll(todos);
         return { state: 'success' };
       } catch {
         return { state: 'error', detailedError: 'FILE_WRITE_FAILED' };

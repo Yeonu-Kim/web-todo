@@ -1,4 +1,4 @@
-import type { RepositoryResponseType } from './response-type';
+import type { RepositoryResponseType } from './response-type.js';
 
 export type Todo = {
   id: number;

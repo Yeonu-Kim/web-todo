@@ -10,28 +10,38 @@ export type Todo = {
 };
 
 export type TodoRepository = {
-  readTodos: () => RepositoryResponseType<Todo[]>;
-  writeTodos: ({ todos }: { todos: Todo[] }) => RepositoryResponseType<void>;
+  readTodos: () => Promise<RepositoryResponseType<Todo[]>>;
+  writeTodos: ({
+    todos,
+  }: {
+    todos: Todo[];
+  }) => Promise<RepositoryResponseType<void>>;
 };
 
 export type TodoUsecase = {
-  addTodo: ({ content }: { content: string }) => UseCaseResponseType<void>;
-  listTodos: () => UseCaseResponseType<Todo[]>;
-  doneTodo: ({ id }: { id: number }) => UseCaseResponseType<void>;
+  addTodo: ({
+    content,
+  }: {
+    content: string;
+  }) => Promise<UseCaseResponseType<void>>;
+  listTodos: () => Promise<UseCaseResponseType<Todo[]>>;
+  doneTodo: ({ id }: { id: number }) => Promise<UseCaseResponseType<void>>;
   deleteTodo: ({
     id,
   }: {
     id: number;
-  }) => UseCaseResponseType<{ id: number; removedContent: string }>;
+  }) => Promise<UseCaseResponseType<{ id: number; removedContent: string }>>;
   updateTodo: ({
     id,
     newContent,
   }: {
     id: number;
     newContent: string;
-  }) => UseCaseResponseType<{
-    id: number;
-    newContent: string;
-    oldContent: string;
-  }>;
+  }) => Promise<
+    UseCaseResponseType<{
+      id: number;
+      newContent: string;
+      oldContent: string;
+    }>
+  >;
 };

@@ -1,4 +1,4 @@
-import type { RepositoryResponseType } from './response-type';
+import type { RepositoryResponseType } from './response-type.js';
 
 type CliRepositorySuccessResponse =
   | { state: 'HELP' | 'READ_TODOS' }

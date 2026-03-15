@@ -5,77 +5,85 @@ export const implTodoUsecase = ({
 }: {
   todoRepository: TodoRepository;
 }): TodoUsecase => ({
-  addTodo: ({ content }) => {
-    const result = todoRepository.readTodos();
-    if (result.state === 'error') {
-      return result;
-    }
+  addTodo: async ({ content }) => {
+    const result = await todoRepository.readTodos();
+    if (result.state === 'error') return result;
+
     const { data: todos } = result;
     const newId =
       todos.length > 0 ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
-    const newTodo = { id: newId, content, done: false };
-    todos.push(newTodo);
-    return todoRepository.writeTodos({ todos });
+
+    return todoRepository.writeTodos({
+      todos: [...todos, { id: newId, content, done: false }],
+    });
   },
-  listTodos: () => {
-    return todoRepository.readTodos();
+
+  listTodos: async () => {
+    return await todoRepository.readTodos();
   },
-  doneTodo: ({ id }) => {
-    const result = todoRepository.readTodos();
-    if (result.state === 'error') {
-      return result;
-    }
+
+  doneTodo: async ({ id }) => {
+    const result = await todoRepository.readTodos();
+    if (result.state === 'error') return result;
+
     const { data: todos } = result;
     const todo = todos.find((t) => t.id === id);
     if (todo === undefined) {
-      return { state: 'error', detailedError: 'NOT_FOUND_ID_IN_DONE' };
+      return { state: 'error', detailedError: 'NOT_FOUND_ID_IN_DONE' } as const;
     }
-    const updatedTodos = todos.map((t) =>
-      t.id === id ? { ...t, done: true } : t
-    );
-    return todoRepository.writeTodos({ todos: updatedTodos });
+
+    return todoRepository.writeTodos({
+      todos: todos.map((t) => (t.id === id ? { ...t, done: true } : t)),
+    });
   },
-  deleteTodo: ({ id }) => {
-    const result = todoRepository.readTodos();
-    if (result.state === 'error') {
-      return result;
-    }
+
+  deleteTodo: async ({ id }) => {
+    const result = await todoRepository.readTodos();
+    if (result.state === 'error') return result;
+
     const { data: todos } = result;
     const todo = todos.find((t) => t.id === id);
     if (todo === undefined) {
-      return { state: 'error', detailedError: 'NOT_FOUND_ID_IN_DELETE' };
+      return {
+        state: 'error',
+        detailedError: 'NOT_FOUND_ID_IN_DELETE',
+      } as const;
     }
-    const updatedTodos = todos.filter((t) => t.id !== id);
-    const response = todoRepository.writeTodos({ todos: updatedTodos });
-    if (response.state === 'error') {
-      return response;
-    }
+
+    const response = await todoRepository.writeTodos({
+      todos: todos.filter((t) => t.id !== id),
+    });
+    if (response.state === 'error') return response;
+
     return {
       state: 'success',
       data: { id, removedContent: todo.content },
-    };
+    } as const;
   },
-  updateTodo: ({ id, newContent }) => {
-    const result = todoRepository.readTodos();
-    if (result.state === 'error') {
-      return result;
-    }
+
+  updateTodo: async ({ id, newContent }) => {
+    const result = await todoRepository.readTodos();
+    if (result.state === 'error') return result;
+
     const { data: todos } = result;
     const todo = todos.find((t) => t.id === id);
     if (todo === undefined) {
-      return { state: 'error', detailedError: 'NOT_FOUND_ID_IN_UPDATE' };
+      return {
+        state: 'error',
+        detailedError: 'NOT_FOUND_ID_IN_UPDATE',
+      } as const;
     }
-    const oldContent = todo.content;
-    const updatedTodos = todos.map((t) =>
-      t.id === id ? { ...t, content: newContent } : t
-    );
-    const response = todoRepository.writeTodos({ todos: updatedTodos });
-    if (response.state === 'error') {
-      return response;
-    }
+
+    const response = await todoRepository.writeTodos({
+      todos: todos.map((t) =>
+        t.id === id ? { ...t, content: newContent } : t
+      ),
+    });
+    if (response.state === 'error') return response;
+
     return {
       state: 'success',
-      data: { id, oldContent, newContent },
-    };
+      data: { id, oldContent: todo.content, newContent },
+    } as const;
   },
 });
