@@ -14,26 +14,33 @@ export class TodoInput extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = this.template();
-    this.bindEvents();
+    this.buttonEl.addEventListener('click', this.handleClickAdd);
+    this.inputEl.addEventListener('keydown', this.handleKeydownAdd);
   }
 
-  private bindEvents() {
-    this.buttonEl.addEventListener('click', () => {
-      this.handleAdd();
-    });
-    this.inputEl.addEventListener('keydown', (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        this.handleAdd();
-      }
-    });
+  disconnectedCallback() {
+    this.buttonEl.removeEventListener('click', this.handleClickAdd);
+    this.inputEl.removeEventListener('keydown', this.handleKeydownAdd);
   }
+
+  private handleClickAdd = () => {
+    this.handleAdd();
+  };
+
+  private handleKeydownAdd = (e: Event) => {
+    if (!(e instanceof KeyboardEvent)) return;
+    if (e.key === 'Enter') this.handleAdd();
+  };
 
   @dispatch('todo:added')
   @errorDispatch('todo:error')
   private async handleAdd() {
     const content = this.inputEl.value.trim();
     if (content.length === 0) {
-      return;
+      return {
+        state: 'error',
+        detailedError: 'EMPTY_CONTENT',
+      } as const;
     }
 
     const response = await this.todoUsecase.addTodo({ content });

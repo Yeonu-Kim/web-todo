@@ -8,8 +8,8 @@ export const implDateUsecase = ({
   getNow: () => {
     const now = dateRepository.getNow();
 
-    const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
-    const month = now.toLocaleDateString('en-US', { month: 'long' });
+    const weekday = now.toLocaleDateString('ko-KR', { weekday: 'long' });
+    const month = now.toLocaleDateString('ko-KR', { month: 'long' });
     const day = now.getDate();
 
     return `${weekday}, ${month} ${day}`;

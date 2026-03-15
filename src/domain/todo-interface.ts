@@ -25,7 +25,7 @@ export type TodoUsecase = {
     content: string;
   }) => Promise<UseCaseResponseType<void>>;
   listTodos: () => Promise<UseCaseResponseType<Todo[]>>;
-  doneTodo: ({ id }: { id: number }) => Promise<UseCaseResponseType<void>>;
+  toggleTodo: ({ id }: { id: number }) => Promise<UseCaseResponseType<void>>;
   deleteTodo: ({
     id,
   }: {

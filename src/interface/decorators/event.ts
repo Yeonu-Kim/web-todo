@@ -1,30 +1,5 @@
-type CustomElementLifecycle = {
-  connectedCallback?(): void;
-  disconnectedCallback?(): void;
-  adoptedCallback?(): void;
-  attributeChangedCallback?(
-    name: string,
-    oldValue: string | null,
-    newValue: string | null
-  ): void;
-};
-
-type CustomElement = HTMLElement & CustomElementLifecycle;
-
-type CustomElementWithIndex = CustomElement & Record<string | symbol, unknown>;
-
 function isFunction(value: unknown): value is (...args: unknown[]) => unknown {
   return typeof value === 'function';
-}
-
-function isCustomElement(target: unknown): target is CustomElement {
-  return target instanceof HTMLElement;
-}
-
-function isCustomElementWithIndex(
-  target: unknown
-): target is CustomElementWithIndex {
-  return target instanceof HTMLElement;
 }
 
 function isResponse(
@@ -34,10 +9,10 @@ function isResponse(
 }
 
 export function dispatch(eventName: string) {
-  return function <T extends (...args: unknown[]) => unknown>(
-    target: T,
+  return function <This extends HTMLElement, Args extends unknown[], Return>(
+    target: (this: This, ...args: Args) => Return,
     _: ClassMethodDecoratorContext
-  ): T {
+  ): (this: This, ...args: Args) => Return {
     if (!isFunction(target)) {
       throw new Error(`@dispatch: 메서드에만 사용할 수 있어요.`);
     }
@@ -59,23 +34,23 @@ export function dispatch(eventName: string) {
       };
 
       if (response instanceof Promise) {
-        return response.then(handle);
+        return response.then(handle) as Return;
       }
 
-      return handle(response);
-    } as T;
+      return handle(response) as Return;
+    };
   };
 }
 
 export function errorDispatch(eventName: string) {
-  return <T extends (...args: unknown[]) => unknown>(
-    target: T,
+  return <This extends HTMLElement, Args extends unknown[], Return>(
+    target: (this: This, ...args: Args) => Return,
     _: ClassMethodDecoratorContext
-  ): T => {
+  ): ((this: This, ...args: Args) => Return) => {
     if (!isFunction(target)) {
       throw new Error(`@errorDispatch: 메서드에만 사용할 수 있어요.`);
     }
-    return function (this: HTMLElement, ...args: unknown[]) {
+    return function (this: This, ...args: Args): Return {
       const response = target.apply(this, args);
 
       const handle = (result: unknown) => {
@@ -92,39 +67,10 @@ export function errorDispatch(eventName: string) {
       };
 
       if (response instanceof Promise) {
-        return response.then(handle);
+        return response.then(handle) as Return;
       }
 
-      return handle(response);
-    } as T;
-  };
-}
-
-export function on(eventName: string, selector?: string) {
-  return (_: unknown, context: ClassMethodDecoratorContext) => {
-    context.addInitializer(function (this: unknown) {
-      if (!isCustomElement(this)) {
-        throw new Error(
-          `@on: HTMLElement를 상속한 클래스에서만 사용할 수 있어요.`
-        );
-      }
-
-      const originalConnected = this.connectedCallback?.bind(this);
-
-      this.connectedCallback = () => {
-        originalConnected?.();
-
-        const target = selector ? this.querySelector(selector) : this;
-
-        if (!isCustomElementWithIndex(this)) return;
-        const handler = this[context.name];
-
-        if (!isFunction(handler)) {
-          throw new Error(`@on: '${String(context.name)}'이 함수가 아니에요.`);
-        }
-
-        target?.addEventListener(eventName, handler.bind(this));
-      };
-    });
+      return handle(response) as Return;
+    };
   };
 }

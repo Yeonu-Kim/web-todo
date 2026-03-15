@@ -22,18 +22,21 @@ export const implTodoUsecase = ({
     return await todoRepository.readTodos();
   },
 
-  doneTodo: async ({ id }) => {
+  toggleTodo: async ({ id }) => {
     const result = await todoRepository.readTodos();
     if (result.state === 'error') return result;
 
     const { data: todos } = result;
     const todo = todos.find((t) => t.id === id);
     if (todo === undefined) {
-      return { state: 'error', detailedError: 'NOT_FOUND_ID_IN_DONE' } as const;
+      return {
+        state: 'error',
+        detailedError: 'NOT_FOUND_ID_IN_TOGGLE',
+      } as const;
     }
 
     return todoRepository.writeTodos({
-      todos: todos.map((t) => (t.id === id ? { ...t, done: true } : t)),
+      todos: todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
     });
   },
 

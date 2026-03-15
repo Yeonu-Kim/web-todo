@@ -229,6 +229,32 @@
   stroke: var(--text-secondary);
 }
 
+.task-item-editing {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(74, 85, 224, 0.12);
+}
+
+.task-edit-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+  padding: 0;
+}
+
+.action-btn-confirm svg {
+  stroke: var(--accent);
+}
+
+.action-btn-cancel svg {
+  stroke: var(--danger);
+}
+
 /* ── Mobile ── */
 @media (max-width: 480px) {
   .background {
@@ -240,7 +266,7 @@
   }
 
   .card {
-    border-radius: 0; /* ← 모바일에서 둥근 모서리 제거 */
+    border-radius: 0;
     padding: 2.8rem 2rem;
     box-shadow: none;
   }
@@ -283,5 +309,9 @@
   .action-btn svg {
     width: 1.7rem;
     height: 1.7rem;
+  }
+
+  .task-edit-input {
+    font-size: 1.4rem;
   }
 }
