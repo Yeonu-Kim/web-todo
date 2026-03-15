@@ -1,4 +1,4 @@
-import type { DETAILED_ERROR } from './detailed-error';
+import type { DETAILED_ERROR } from './detailed-error.js';
 
 export type UseCaseResponseType<TData> =
   | (TData extends void
