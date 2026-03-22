@@ -1,5 +1,7 @@
 export type TodoResponse = {
-  something: string;
+  id: number;
+  content: string;
+  done: boolean;
 };
 
 export type TodoIdParams = {

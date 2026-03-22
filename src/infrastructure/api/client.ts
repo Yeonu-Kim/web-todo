@@ -4,7 +4,7 @@ import type {
   ErrorResponse,
   RawCall,
   ResponseNecessary,
-} from './api-domain';
+} from '../../domain/api/api-domain';
 import { decodeHtmlStrings } from './api-utils';
 
 export const implApi = ({ rawCall }: { rawCall: RawCall }) => {
