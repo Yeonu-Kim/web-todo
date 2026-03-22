@@ -1,5 +1,6 @@
 import type { TodoUsecase } from '../../domain/todo-interface';
 import { ASSET_LINK } from '../assets/asset-link';
+import { EVENT_NAMES } from '../assets/event-name';
 import { COMPONENT_TAGS } from '../assets/tag-name';
 import { inject, queryStrict } from '../decorators/attr';
 import { customElement } from '../decorators/custom-element';
@@ -38,21 +39,21 @@ export class TodoInput extends HTMLElement {
     }
   };
 
-  @dispatch('todo:added')
-  @errorDispatch('todo:error')
+  @dispatch(EVENT_NAMES.TODO_ADDED)
+  @errorDispatch(EVENT_NAMES.TODO_ERROR)
   private async handleAdd() {
     const content = this.inputEl.value.trim();
     if (content.length === 0) {
       return {
         state: 'error',
         detailedError: 'EMPTY_CONTENT',
-      } as const;
+      };
     }
 
     this.inputEl.value = '';
     this.inputEl.focus();
     this.dispatchEvent(
-      new CustomEvent('todo:added', {
+      new CustomEvent(EVENT_NAMES.TODO_ADDED, {
         bubbles: true,
         detail: { content },
       })
@@ -62,7 +63,7 @@ export class TodoInput extends HTMLElement {
 
     if (response.state === 'error') {
       this.dispatchEvent(
-        new CustomEvent('todo:added:rollback', { bubbles: true })
+        new CustomEvent(EVENT_NAMES.TODO_ADDED_ROLLBACK, { bubbles: true })
       );
     }
 

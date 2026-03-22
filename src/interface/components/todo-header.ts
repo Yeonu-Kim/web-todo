@@ -13,7 +13,11 @@ export class TodoHeader extends HTMLElement {
   }
 
   render() {
-    this.querySelector('.date')!.textContent = this.dateUsecase.getNow();
+    const dateEl = this.querySelector('.date');
+    if (dateEl === null) {
+      return;
+    }
+    dateEl.textContent = this.dateUsecase.getNow();
   }
 
   private template() {

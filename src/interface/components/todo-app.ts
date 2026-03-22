@@ -1,5 +1,6 @@
 import type { DateUsecase } from '../../domain/date-interface';
 import type { TodoUsecase } from '../../domain/todo-interface';
+import { EVENT_NAMES } from '../assets/event-name';
 import { COMPONENT_TAGS } from '../assets/tag-name';
 import { inject } from '../decorators/attr';
 import { customElement } from '../decorators/custom-element';
@@ -18,13 +19,13 @@ export class TodoApp extends HTMLElement {
   connectedCallback() {
     this.innerHTML = this.template();
     this.injectDependencies();
-    this.addEventListener('todo:added', this.handleAdded);
-    this.addEventListener('todo:error', this.handleError);
+    this.addEventListener(EVENT_NAMES.TODO_ADDED, this.handleAdded);
+    this.addEventListener(EVENT_NAMES.TODO_ERROR, this.handleError);
   }
 
   disconnectedCallback() {
-    this.removeEventListener('todo:added', this.handleAdded);
-    this.removeEventListener('todo:error', this.handleError);
+    this.removeEventListener(EVENT_NAMES.TODO_ADDED, this.handleAdded);
+    this.removeEventListener(EVENT_NAMES.TODO_ERROR, this.handleError);
   }
 
   private handleError = (e: Event) => {
@@ -61,7 +62,7 @@ export class TodoApp extends HTMLElement {
       return;
     }
     todoList.dispatchEvent(
-      new CustomEvent('todo:added', {
+      new CustomEvent(EVENT_NAMES.TODO_ADDED, {
         detail: e.detail,
         bubbles: false,
       })
