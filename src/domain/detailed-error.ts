@@ -1,4 +1,4 @@
-export type DETAILED_ERROR =
+export type DetailedError =
   | 'TODO_FETCH_FAILED'
   | 'TODO_FETCH_BY_ID_FAILED'
   | 'TODO_CREATE_FAILED'
