@@ -2,6 +2,7 @@ import type { TodoUsecase } from '../../domain/todo-interface';
 import { inject } from '../decorators/attr';
 import { customElement } from '../decorators/custom-element';
 import { errorDispatch } from '../decorators/event';
+import { optimistic } from '../utils/optimistic-render';
 import { TodoEdit } from './todo-edit';
 import { TodoItem } from './todo-item';
 
@@ -89,7 +90,7 @@ export class TodoList extends HTMLElement {
   }
 
   @errorDispatch('todo:error')
-  private async handleToggle(e: Event) {
+  private handleToggle(e: Event) {
     if (!(e instanceof CustomEvent)) {
       return;
     }
@@ -99,17 +100,13 @@ export class TodoList extends HTMLElement {
     if (item === null) {
       return;
     }
-    item.toggleDone();
-
-    const result = await this.todoUsecase.toggleTodo({
-      id: Number(e.detail.id),
-    });
-
-    if (result.state === 'error') {
-      await this.render();
-    }
-
-    return result;
+    const optimisticFn = () => item.toggleDone();
+    const asyncFn = () =>
+      this.todoUsecase.toggleTodo({
+        id: Number(e.detail.id),
+      });
+    const rollbackFn = () => this.render();
+    return optimistic({ optimisticFn, asyncFn, rollbackFn });
   }
 
   @errorDispatch('todo:error')
@@ -132,12 +129,13 @@ export class TodoList extends HTMLElement {
     const done = item.classList.contains('done');
 
     const editEl = new TodoEdit();
+    editEl.setOriginalItem(item);
     item.replaceWith(editEl);
     editEl.setTodo({ id: Number(id), content, done });
   }
 
   @errorDispatch('todo:error')
-  private async handleUpdate(e: Event) {
+  private handleUpdate(e: Event) {
     if (!(e instanceof CustomEvent)) {
       return;
     }
@@ -150,27 +148,44 @@ export class TodoList extends HTMLElement {
     if (editEl === null) {
       return null;
     }
-    const isDone = editEl.classList.contains('done') ?? false;
-    const tempItem = new TodoItem();
-    editEl.replaceWith(tempItem);
-    tempItem.setTodo({ id: Number(id), content: newContent, done: isDone });
 
-    const result = await this.todoUsecase.updateTodo({
-      id: Number(id),
-      newContent,
-    });
-    if (result.state === 'error') {
-      await this.render();
-    }
+    const optimisticFn = () => {
+      const isDone = editEl.classList.contains('done') ?? false;
+      const tempItem = new TodoItem();
+      editEl.replaceWith(tempItem);
+      tempItem.setTodo({ id: Number(id), content: newContent, done: isDone });
+    };
+    const asyncFn = () =>
+      this.todoUsecase.updateTodo({
+        id: Number(id),
+        newContent,
+      });
+    const rollbackFn = () => this.render();
+
+    const result = optimistic({ optimisticFn, asyncFn, rollbackFn });
     return result;
   }
 
-  private handleCancel = async () => {
-    await this.render();
+  private handleCancel = (e: Event) => {
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    if (!isTodoDetail(e.detail)) {
+      return;
+    }
+    const { id } = e.detail;
+
+    const editEl = this.querySelector(`todo-edit[data-id="${id}"]`);
+    if (editEl === null) return;
+
+    const original = (editEl as TodoEdit).getOriginalItem();
+    if (original === null) return;
+
+    editEl.replaceWith(original);
   };
 
   @errorDispatch('todo:error')
-  private async handleDelete(e: Event) {
+  private handleDelete(e: Event) {
     if (!(e instanceof CustomEvent)) {
       return;
     }
@@ -178,17 +193,21 @@ export class TodoList extends HTMLElement {
       return;
     }
 
-    const id = e.detail.id;
-    const item = this.querySelector(`todo-item[data-id="${id}"]`);
-    if (item === null) {
-      return;
-    }
-    item.remove();
+    const optimisticFn = () => {
+      const id = e.detail.id;
+      const item = this.querySelector(`todo-item[data-id="${id}"]`);
+      if (item === null) {
+        return;
+      }
+      item.remove();
+    };
+    const asyncFn = () =>
+      this.todoUsecase.deleteTodo({
+        id: Number(e.detail.id),
+      });
+    const rollbackFn = () => this.render();
 
-    const result = await this.todoUsecase.deleteTodo({
-      id: Number(e.detail.id),
-    });
-    if (result.state === 'error') await this.render();
+    const result = optimistic({ optimisticFn, asyncFn, rollbackFn });
     return result;
   }
 }

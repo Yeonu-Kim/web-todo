@@ -4,6 +4,16 @@ import { customElement } from '../decorators/custom-element';
 
 @customElement('todo-edit')
 export class TodoEdit extends HTMLElement {
+  private originalItem: Element | null = null;
+
+  setOriginalItem(item: Element) {
+    this.originalItem = item;
+  }
+
+  getOriginalItem() {
+    return this.originalItem;
+  }
+
   setTodo(todo: Todo) {
     this.dataset.id = String(todo.id);
     this.render(todo);
