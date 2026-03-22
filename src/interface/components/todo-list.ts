@@ -1,4 +1,5 @@
 import type { TodoUsecase } from '../../domain/todo-interface';
+import { COMPONENT_TAGS } from '../assets/tag-name';
 import { inject } from '../decorators/attr';
 import { customElement } from '../decorators/custom-element';
 import { errorDispatch } from '../decorators/event';
@@ -19,7 +20,7 @@ const isTodoUpdateDetail = (
   'newContent' in value &&
   typeof (value as Record<string, unknown>).newContent === 'string';
 
-@customElement('todo-list')
+@customElement(COMPONENT_TAGS.TODO_LIST)
 export class TodoList extends HTMLElement {
   @inject<TodoUsecase>('todoUsecase')
   accessor todoUsecase!: TodoUsecase;
@@ -38,7 +39,9 @@ export class TodoList extends HTMLElement {
 
     this.innerHTML = '<ul class="task-list"></ul>';
     const ul = this.querySelector('ul');
-    if (ul === null) return;
+    if (ul === null) {
+      return;
+    }
 
     for (const todo of result.data) {
       const item = new TodoItem();

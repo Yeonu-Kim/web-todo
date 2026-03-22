@@ -1,8 +1,9 @@
 import type { Todo } from '../../domain/todo-interface';
 import { ASSET_LINK } from '../assets/asset-link';
+import { COMPONENT_TAGS } from '../assets/tag-name';
 import { customElement } from '../decorators/custom-element';
 
-@customElement('todo-item')
+@customElement(COMPONENT_TAGS.TODO_ITEM)
 export class TodoItem extends HTMLElement {
   setTodo(todo: Todo) {
     this.dataset.id = String(todo.id);

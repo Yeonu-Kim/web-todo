@@ -1,8 +1,9 @@
 import type { Todo } from '../../domain/todo-interface';
 import { ASSET_LINK } from '../assets/asset-link';
+import { COMPONENT_TAGS } from '../assets/tag-name';
 import { customElement } from '../decorators/custom-element';
 
-@customElement('todo-edit')
+@customElement(COMPONENT_TAGS.TODO_EDIT)
 export class TodoEdit extends HTMLElement {
   private originalItem: Element | null = null;
 
@@ -47,10 +48,16 @@ export class TodoEdit extends HTMLElement {
   }
 
   private handleKeydown = (e: Event) => {
-    if (!(e instanceof KeyboardEvent)) return;
+    if (!(e instanceof KeyboardEvent)) {
+      return;
+    }
 
-    if (e.key === 'Enter') this.handleCommit();
-    if (e.key === 'Escape') this.handleCancel();
+    if (e.key === 'Enter') {
+      this.handleCommit();
+    }
+    if (e.key === 'Escape') {
+      this.handleCancel();
+    }
   };
 
   private handleClick = (e: MouseEvent) => {

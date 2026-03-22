@@ -1,10 +1,11 @@
 import type { TodoUsecase } from '../../domain/todo-interface';
 import { ASSET_LINK } from '../assets/asset-link';
+import { COMPONENT_TAGS } from '../assets/tag-name';
 import { inject, queryStrict } from '../decorators/attr';
 import { customElement } from '../decorators/custom-element';
 import { dispatch, errorDispatch } from '../decorators/event';
 
-@customElement('todo-input')
+@customElement(COMPONENT_TAGS.TODO_INPUT)
 export class TodoInput extends HTMLElement {
   @inject<TodoUsecase>('todoUsecase')
   accessor todoUsecase!: TodoUsecase;
@@ -29,8 +30,12 @@ export class TodoInput extends HTMLElement {
   };
 
   private handleKeydownAdd = (e: Event) => {
-    if (!(e instanceof KeyboardEvent)) return;
-    if (e.key === 'Enter') this.handleAdd();
+    if (!(e instanceof KeyboardEvent)) {
+      return;
+    }
+    if (e.key === 'Enter') {
+      this.handleAdd();
+    }
   };
 
   @dispatch('todo:added')
