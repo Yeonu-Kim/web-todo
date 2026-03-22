@@ -19,6 +19,6 @@ jobs:
           node-version: "20.11.1"
           cache: "npm"
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
       - name: Check
-        run: npm run check-all
+        run: pnpm check-all
