@@ -43,7 +43,9 @@ export class TodoItem extends HTMLElement {
 
   private handleClick = (e: MouseEvent) => {
     const target = e.target;
-    if (!(target instanceof Element)) return;
+    if (!(target instanceof Element)) {
+      return;
+    }
 
     const btn = target.closest<HTMLButtonElement>('.action-btn');
 
@@ -58,7 +60,9 @@ export class TodoItem extends HTMLElement {
     }
 
     const action = btn.dataset.action;
-    if (action === undefined) return;
+    if (action === undefined) {
+      return;
+    }
 
     this.dispatchEvent(
       new CustomEvent(`todo:${action}`, {
@@ -67,4 +71,21 @@ export class TodoItem extends HTMLElement {
       })
     );
   };
+
+  toggleDone() {
+    const li = this.querySelector('li');
+    if (li === null) return;
+
+    const isDone = li.classList.contains('done');
+    const checkbox = this.querySelector('.checkbox');
+
+    li.classList.toggle('done', !isDone);
+    this.classList.toggle('done', !isDone);
+    if (checkbox !== null) {
+      checkbox.setAttribute(
+        'aria-label',
+        isDone ? 'Mark complete' : 'Mark incomplete'
+      );
+    }
+  }
 }
