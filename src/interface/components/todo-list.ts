@@ -48,6 +48,7 @@ export class TodoList extends HTMLElement {
 
   connectedCallback() {
     this.addEventListener('todo:added', this.handleAdded);
+    this.addEventListener('todo:added:rollback', this.handleAddRollback);
     this.addEventListener('todo:toggle', this.handleToggle);
     this.addEventListener('todo:edit', this.handleEdit);
     this.addEventListener('todo:delete', this.handleDelete);
@@ -57,6 +58,7 @@ export class TodoList extends HTMLElement {
 
   disconnectedCallback() {
     this.removeEventListener('todo:added', this.handleAdded);
+    this.removeEventListener('todo:added:rollback', this.handleAddRollback);
     this.removeEventListener('todo:toggle', this.handleToggle);
     this.removeEventListener('todo:edit', this.handleEdit);
     this.removeEventListener('todo:delete', this.handleDelete);
@@ -64,51 +66,102 @@ export class TodoList extends HTMLElement {
     this.removeEventListener('todo:cancel', this.handleCancel);
   }
 
-  private async handleAdded() {
+  @errorDispatch('todo:error')
+  private async handleAdded(e: Event) {
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    const content = String(e.detail.content);
+
+    const ul = this.querySelector('ul');
+    if (ul === null) return;
+
+    const tempItem = new TodoItem();
+    tempItem.dataset.temp = 'true';
+    ul.appendChild(tempItem);
+    tempItem.setTodo({ id: -1, content, done: false });
+    await this.render();
+  }
+
+  @errorDispatch('todo:error:rollback')
+  private async handleAddRollback() {
     await this.render();
   }
 
   @errorDispatch('todo:error')
   private async handleToggle(e: Event) {
-    if (!(e instanceof CustomEvent)) return;
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    const id = String(e.detail.id);
+
+    const item = this.querySelector<TodoItem>(`todo-item[data-id="${id}"]`);
+    if (item === null) {
+      return;
+    }
+    item.toggleDone();
+
     const result = await this.todoUsecase.toggleTodo({
       id: Number(e.detail.id),
     });
-    if (result.state === 'success') await this.render();
+
+    if (result.state === 'error') {
+      await this.render();
+    }
+
     return result;
   }
 
   @errorDispatch('todo:error')
-  private async handleEdit(e: Event) {
-    if (!(e instanceof CustomEvent)) return;
-    if (!isTodoDetail(e.detail)) return;
+  private handleEdit(e: Event) {
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    if (!isTodoDetail(e.detail)) {
+      return;
+    }
+
     const { id } = e.detail;
 
     const item = this.querySelector(`todo-item[data-id="${id}"]`);
-    if (item === null) return;
+    if (item === null) {
+      return;
+    }
 
-    const result = await this.todoUsecase.listTodos();
-    if (result.state === 'error') return result;
-
-    const todo = result.data.find((t) => String(t.id) === id);
-    if (todo === undefined) return;
+    const content = item.querySelector('.task-label')?.textContent ?? '';
+    const done = item.classList.contains('done');
 
     const editEl = new TodoEdit();
     item.replaceWith(editEl);
-    editEl.setTodo(todo);
-    return result;
+    editEl.setTodo({ id: Number(id), content, done });
   }
 
   @errorDispatch('todo:error')
   private async handleUpdate(e: Event) {
-    if (!(e instanceof CustomEvent)) return;
-    if (!isTodoUpdateDetail(e.detail)) return;
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    if (!isTodoUpdateDetail(e.detail)) {
+      return;
+    }
     const { id, newContent } = e.detail;
+
+    const editEl = this.querySelector(`todo-edit[data-id="${id}"]`);
+    if (editEl === null) {
+      return null;
+    }
+    const isDone = editEl.classList.contains('done') ?? false;
+    const tempItem = new TodoItem();
+    editEl.replaceWith(tempItem);
+    tempItem.setTodo({ id: Number(id), content: newContent, done: isDone });
+
     const result = await this.todoUsecase.updateTodo({
       id: Number(id),
       newContent,
     });
-    if (result.state === 'success') await this.render();
+    if (result.state === 'error') {
+      await this.render();
+    }
     return result;
   }
 
@@ -118,12 +171,24 @@ export class TodoList extends HTMLElement {
 
   @errorDispatch('todo:error')
   private async handleDelete(e: Event) {
-    if (!(e instanceof CustomEvent)) return;
-    if (!isTodoDetail(e.detail)) return;
+    if (!(e instanceof CustomEvent)) {
+      return;
+    }
+    if (!isTodoDetail(e.detail)) {
+      return;
+    }
+
+    const id = e.detail.id;
+    const item = this.querySelector(`todo-item[data-id="${id}"]`);
+    if (item === null) {
+      return;
+    }
+    item.remove();
+
     const result = await this.todoUsecase.deleteTodo({
       id: Number(e.detail.id),
     });
-    if (result.state === 'success') await this.render();
+    if (result.state === 'error') await this.render();
     return result;
   }
 }

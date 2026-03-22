@@ -44,11 +44,21 @@ export class TodoInput extends HTMLElement {
       } as const;
     }
 
+    this.inputEl.value = '';
+    this.inputEl.focus();
+    this.dispatchEvent(
+      new CustomEvent('todo:added', {
+        bubbles: true,
+        detail: { content },
+      })
+    );
+
     const response = await this.todoUsecase.addTodo({ content });
 
-    if (response.state === 'success') {
-      this.inputEl.value = '';
-      this.inputEl.focus();
+    if (response.state === 'error') {
+      this.dispatchEvent(
+        new CustomEvent('todo:added:rollback', { bubbles: true })
+      );
     }
 
     return response;

@@ -29,7 +29,7 @@ export type ErrorResponse<
   };
 };
 
-export type SuccessResponse<T, Status extends number = 200 | 201> = {
+export type SuccessResponse<T, Status extends number = 200 | 201 | 304> = {
   status: Status;
   data: T;
 };

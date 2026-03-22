@@ -35,7 +35,7 @@ export const implTodoRepository = ({
         done: false,
       };
       const response = await apiRepository['POST /todos']({ body });
-      if (response.status !== 200) {
+      if (response.status !== 201) {
         return { state: 'error', detailedError: 'FILE_READ_FAILED' };
       }
       return {
